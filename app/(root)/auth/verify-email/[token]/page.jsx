@@ -1,8 +1,8 @@
-"use client";
+'use client'
 
 import { Card, CardContent } from "@/components/ui/card";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import verifiedImg from "@/public/assets/images/verified.gif";
@@ -11,13 +11,15 @@ import { Button } from "@/components/ui/button";
 import { WEBSITE_HOME } from "@/routes/websiteRoutes";
 
 const EmailVerification = ({ params }) => {
-  const { token } = params; // ✅ FIXED
+  const { token } = use(params) // ✅ FIXED
+
+
   const [isVerified, setIsVerified] = useState(null); // null = loading
 
   useEffect(() => {
     const verify = async () => {
       try {
-        const { data } = await axios.post("/api/auth/varify-email", { token });
+        const { data } = await axios.post("/api/auth/verify-email", { token });
         setIsVerified(data.success);
       } catch (err) {
         setIsVerified(false);

@@ -58,10 +58,10 @@ export async function POST(request) {
       .sign(secret);
      console.log("url : " + process.env.NEXT_PUBLIC_BASE_URL);
     const mailResponse = await sendMail(
-      "Email Varification from Devloper Parmanand",
+      "Email Verification from Devloper Parmanand",
       email,
       emailVerificationLink(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/auth/varify-email/${token}`
+        `${process.env.NEXT_PUBLIC_BASE_URL}/auth/verify-email/${token}`
       )
 
      

@@ -24,7 +24,7 @@ export async function POST(request) {
     user.isEmailVerified = true;
 
     await user.save();
-    return response(true,200,'Email Varification Successful.');
+    return response(true,200,'Email Verification Successful.');
   } catch (error) {
     catchError(error);
   }
