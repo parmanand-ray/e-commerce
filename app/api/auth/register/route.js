@@ -45,7 +45,7 @@ export async function POST(request) {
     });
 
     await newRegistation.save();
-    
+
     if (!process.env.SECRET_KEY) {
       throw new Error("SECRET_KEY not defined");
     }
@@ -56,16 +56,13 @@ export async function POST(request) {
       .setExpirationTime("1h")
       .setProtectedHeader({ alg: "HS256" })
       .sign(secret);
-     console.log("url : " + process.env.NEXT_PUBLIC_BASE_URL);
+    console.log("url : " + process.env.NEXT_PUBLIC_BASE_URL);
     const mailResponse = await sendMail(
       "Email Verification from Devloper Parmanand",
       email,
       emailVerificationLink(
         `${process.env.NEXT_PUBLIC_BASE_URL}/auth/verify-email/${token}`
       )
-
-     
-      
     );
 
     if (!mailResponse.success) {
