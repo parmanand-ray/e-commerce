@@ -21,10 +21,16 @@ import { Input } from "@/components/ui/input";
 import ButtonLoading from "@/components/Application/ButtonLoading";
 import Link from "next/link";
 import { WEBSITE_REGISTER } from "@/routes/websiteRoutes";
+import { showToast } from "@/lib/showToast";
+import axios from "axios";
+import OTPVerification from "@/components/Application/OTPVerification";
 
 function Login() {
   const [loading, setLoading] = useState(false);
+  const [otpVerificationLoading, setOtpVerificationLoading] = useState(false);
+
   const [isTypePass, setTypePass] = useState(true);
+  const [otpEmail, setOtpEmail] = useState();
   const formSchema = zSchema
     .pick({
       email: true,
@@ -42,9 +48,48 @@ function Login() {
     },
   });
 
-  const handleLoginSubmit = (value) => {
-    console.log(value);
+  const handleLoginSubmit = async (values) => {
+    try {
+      setLoading(true);
+      const { data: registerResponse } = await axios.post(
+        "/api/auth/login",
+        values
+      );
+
+      if (!registerResponse.success) {
+        throw new Error(registerResponse.message);
+      }
+      setOtpEmail(values.email);
+      form.reset();
+      showToast("success", registerResponse.message);
+    } catch (error) {
+      showToast("error", error.message);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const handleOtpVerification = async (values) => {
+  try {
+    setOtpVerificationLoading(true);
+    const { data: registerResponse } = await axios.post(
+      "/api/auth/verify-otp",
+      values
+    );
+
+    if (!registerResponse.success) {
+      throw new Error(registerResponse.message);
+    }
+
+    setOtpEmail("");
+    showToast("success", registerResponse.message);
+  } catch (error) {
+    showToast("error", error.message);
+  } finally {
+    setOtpVerificationLoading(false);
+  }
+};
+
 
   return (
     <Card className="w-[400px]">
@@ -58,7 +103,9 @@ function Login() {
             alt="logo"
           />
         </div>
-        <div className="text-center">
+        {!otpEmail ? 
+        <>
+         <div className="text-center">
           <h1 className="text-3xl font-bold">Login Into Account</h1>
           <p>Login into your account by filling out the form below.</p>
         </div>
@@ -118,7 +165,7 @@ function Login() {
                   type="submit"
                   text="Login"
                   loading={loading}
-                  onClick={handleLoginSubmit}
+                  // onClick={handleLoginSubmit}
                   className={"w-full cursor-pointer bg-violet-500"}
                 />
               </div>
@@ -141,7 +188,11 @@ function Login() {
               </div>
             </form>
           </Form>
-        </div>
+        </div></>
+         : 
+         <><OTPVerification email={otpEmail} loading={otpVerificationLoading} onSubmit={handleOtpVerification}/></>
+         }
+       
       </CardContent>
     </Card>
   );

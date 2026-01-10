@@ -7,16 +7,19 @@ import UserModel from "@/models/User.model";
 import z from "zod";
 import OTPModel from "@/models/Otp.model";
 import { otpEmail } from "@/email/otpEmail";
+import { SignJWT } from "jose";
 
 export async function POST(request) {
   try {
     await connectDB();
     const payload = await request.json();
-    const validationSchema = z.Schema.pick({
-      email: true,
-    }).extend({
-      password: z.string(),
-    });
+    const validationSchema = zSchema
+      .pick({
+        email: true,
+      })
+      .extend({
+        password: z.string().min(1, "Password is required"),
+      });
 
     const validatedData = validationSchema.safeParse(payload);
 
@@ -32,7 +35,9 @@ export async function POST(request) {
     const { email, password } = validatedData.data;
     //get User
 
-    const getUser = await UserModel.findOne({ email });
+    const getUser = await UserModel.findOne({ deletedAt: null, email }).select(
+      "+password"
+    );
 
     if (!getUser) {
       return response(false, 404, "Invalid Login Credentials");
@@ -66,23 +71,26 @@ export async function POST(request) {
       );
     }
     // OTP Generation
-    await OTPModel.deleteMany({email}); // deleting all OTps
+    await OTPModel.deleteMany({ email }); // deleting all OTps
     const otp = generateOTP();
 
     //saving otp into db
     const newOtpData = new OTPModel({
-        email, otp
-    })
+      email,
+      otp,
+    });
 
     await newOtpData.save();
-    const otpEmailStatus = await sendMail('Loging Verification code',email,otpEmail(otp));
-    if(!otpEmailStatus.success){
-        return response(false,500,'Failed to send OTP');
+    const otpEmailStatus = await sendMail(
+      "Loging Verification code",
+      email,
+      otpEmail(otp)
+    );
+    if (!otpEmailStatus.success) {
+      return response(false, 500, "Failed to send OTP");
     }
 
-
-    return response (true, 200, 'Please varify your device');
-
+    return response(true, 200, "Please varify your device");
   } catch (error) {
     return catchError(error);
   }

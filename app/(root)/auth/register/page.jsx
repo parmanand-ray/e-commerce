@@ -22,6 +22,7 @@ import ButtonLoading from "@/components/Application/ButtonLoading";
 import Link from "next/link";
 import { WEBSITE_LOGIN, WEBSITE_REGISTER } from "@/routes/websiteRoutes";
 import axios from "axios";
+import { showToast } from "@/lib/showToast";
 
 function RegisterPage() {
   const [loading, setLoading] = useState(false);
@@ -64,8 +65,10 @@ function RegisterPage() {
       }
 
       form.reset();
-      alert(registerResponse.message);
+      showToast("success", registerResponse.message);
     } catch (error) {
+      showToast("error", error.message);
+      
     } finally {
       setLoading(false);
     }
