@@ -1,4 +1,5 @@
 
+import GlobleProvider from "@/components/Application/GlobleProvider";
 import "./globals.css";
 import {Assistant} from 'next/font/google';
 import { ToastContainer } from 'react-toastify';
@@ -21,8 +22,10 @@ export default function RootLayout({ children }) {
       <body
         className={`${assistantFont.className} antialiased`}
       >
+        <GlobleProvider>
          <ToastContainer />
         {children}
+        </GlobleProvider>
       </body>
     </html>
   );

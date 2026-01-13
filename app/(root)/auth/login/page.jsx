@@ -9,14 +9,7 @@ import { useForm } from "react-hook-form";
 import z from "zod";
 import { FaRegEyeSlash } from "react-icons/fa";
 import { FaRegEye } from "react-icons/fa6";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import ButtonLoading from "@/components/Application/ButtonLoading";
 import Link from "next/link";
@@ -24,8 +17,10 @@ import { WEBSITE_REGISTER } from "@/routes/websiteRoutes";
 import { showToast } from "@/lib/showToast";
 import axios from "axios";
 import OTPVerification from "@/components/Application/OTPVerification";
-
+import { useDispatch } from 'react-redux';
+import { login } from "@/store/reducer/authReducer";
 function Login() {
+  const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [otpVerificationLoading, setOtpVerificationLoading] = useState(false);
 
@@ -51,17 +46,17 @@ function Login() {
   const handleLoginSubmit = async (values) => {
     try {
       setLoading(true);
-      const { data: registerResponse } = await axios.post(
+      const { data: loginResponse } = await axios.post(
         "/api/auth/login",
         values
       );
 
-      if (!registerResponse.success) {
-        throw new Error(registerResponse.message);
+      if (!loginResponse.success) {
+        throw new Error(loginResponse.message);
       }
       setOtpEmail(values.email);
       form.reset();
-      showToast("success", registerResponse.message);
+      showToast("success", loginResponse.message);
     } catch (error) {
       showToast("error", error.message);
     } finally {
@@ -72,17 +67,20 @@ function Login() {
   const handleOtpVerification = async (values) => {
   try {
     setOtpVerificationLoading(true);
-    const { data: registerResponse } = await axios.post(
+    const { data: otpResponse } = await axios.post(
       "/api/auth/verify-otp",
       values
     );
 
-    if (!registerResponse.success) {
-      throw new Error(registerResponse.message);
+    if (!otpResponse.success) {
+      throw new Error(otpResponse.message);
     }
 
     setOtpEmail("");
-    showToast("success", registerResponse.message);
+    showToast("success", otpResponse.message);
+
+    dispatch(login(otpResponse.data));
+
   } catch (error) {
     showToast("error", error.message);
   } finally {

@@ -1,6 +1,6 @@
 import { zSchema } from "@/lib/zodSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import {
   Form,
@@ -16,13 +16,15 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import { showToast } from "@/lib/showToast";
+import axios from "axios";
 
 function OTPVerification({ email, onSubmit, loading }) {
   const formSchema = zSchema.pick({
     email: true,
     otp: true,
   });
-
+const [reSendingOtp, setReSendingOtp] = useState(false);
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -34,6 +36,26 @@ function OTPVerification({ email, onSubmit, loading }) {
   const handleOtpVarification = async (values) => {
     onSubmit(values);
   };
+
+  const resendOTP = async () => {
+    try {
+      setReSendingOtp(true);
+      const { data: resendOtpResponse } = await axios.post(
+        "/api/auth/resend-otp",
+        {email}
+      );
+
+      if (!resendOtpResponse.success) {
+        throw new Error(resendOtpResponse.message);
+      }
+      
+      showToast("success", resendOtpResponse.message);
+    } catch (error) {
+      showToast("error", error.message);
+    } finally {
+      setReSendingOtp(false);
+    }
+  }
 
   return (
     <div>
@@ -85,12 +107,15 @@ function OTPVerification({ email, onSubmit, loading }) {
               className={"w-full cursor-pointer bg-violet-500"}
             />
             <div className="text-center mt-5">
-              <button
+              {!reSendingOtp ? <button onClick={resendOTP}
                 type="submit"
                 className="text-blue-600 hover:underline cursor-pointer"
               >
                 Resend OTP
-              </button>
+              </button> :
+              <span className="text-md">Resending...</span>
+              }
+              
             </div>
           </div>
         </form>

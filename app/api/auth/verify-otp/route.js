@@ -68,7 +68,7 @@ export async function POST(request) {
 
     await getOtpData.deleteOne();
 
-    return response(true,200,'Loggin Successfull.')
+    return response(true,200,'Loggin Successfull.',loggedInUserData)
    
   } catch (error) {
     catchError(error);
