@@ -5,7 +5,7 @@ import { sendMail } from "@/lib/sendMail";
 import { zSchema } from "@/lib/zodSchema";
 import OTPModel from "@/models/Otp.model";
 import UserModel from "@/models/User.model";
-import { email } from "zod";
+
 
 export async function POST(request) {
     try {

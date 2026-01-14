@@ -81,11 +81,13 @@ export async function POST(request) {
     });
 
     await newOtpData.save();
+
     const otpEmailStatus = await sendMail(
       "Loging Verification code",
       email,
       otpEmail(otp)
     );
+    
     if (!otpEmailStatus.success) {
       return response(false, 500, "Failed to send OTP");
     }
