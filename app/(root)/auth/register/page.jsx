@@ -20,7 +20,7 @@ import {
 import { Input } from "@/components/ui/input";
 import ButtonLoading from "@/components/Application/ButtonLoading";
 import Link from "next/link";
-import { WEBSITE_LOGIN, WEBSITE_REGISTER } from "@/routes/websiteRoutes";
+import { WEBSITE_LOGIN, WEBSITE_REGISTER, WEBSITE_RESETPASSWORD } from "@/routes/websiteRoutes";
 import axios from "axios";
 import { showToast } from "@/lib/showToast";
 
@@ -201,7 +201,7 @@ function RegisterPage() {
                   </Link>
                 </div>
                 <div className="mt-2">
-                  <Link href="" className="text-violet-600 underline">
+                  <Link href={WEBSITE_RESETPASSWORD} className="text-violet-600 underline">
                     Forget Password?
                   </Link>
                 </div>

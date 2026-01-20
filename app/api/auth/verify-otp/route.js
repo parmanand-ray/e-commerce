@@ -26,6 +26,8 @@ export async function POST(request) {
 
     const getOtpData = await OTPModel.findOne({email, otp});
 
+    
+
     if(!getOtpData) {
         return response(false,404,'Invalid or Expire OTP', validatedData.error)
     }
@@ -47,7 +49,7 @@ export async function POST(request) {
     };
 
     const secret = new TextEncoder().encode(process.env.SECRET_KEY);
-    const token = new SignJWT(loggedInUserData)
+    const token = await new SignJWT(loggedInUserData)
     .setIssuedAt()
     .setExpirationTime('24h')
     .setProtectedHeader({alg:'HS256'})
