@@ -23,6 +23,11 @@
           require: true,
           trim:true,
         },
+        secure_url: {
+          type: String,
+          require: true,
+          trim:true,
+        },
         alt: {
           type: String, 
           trim:true,
