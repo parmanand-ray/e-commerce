@@ -6,36 +6,45 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import React from "react";
 
 const BreadCrumb = ({breadcrumbData}) => {
   return (
     <Breadcrumb className="mb-5">
-      <BreadcrumbList>
+  <BreadcrumbList className="flex items-center flex-wrap gap-2 text-sm text-gray-800">
 
-      {breadcrumbData.length > 0 && breadcrumbData.map((data, index)=>{
-        return(
-            index !== breadcrumbData.length-1 ?
+    {breadcrumbData?.length > 0 && breadcrumbData.map((data, index) => {
+      const isLast = index === breadcrumbData.length - 1;
 
-            <div key={index} className="flex items-center">
-                <BreadcrumbItem>
-                    <BreadcrumbLink href={data.href}>{data.label}</BreadcrumbLink>
-                </BreadcrumbItem>
-                <BreadcrumbSeparator className="ms-2 mt-1"/>
-            </div>
+      return (
+        <React.Fragment key={index}>
+          
+          <BreadcrumbItem>
+            <BreadcrumbLink
+              href={data.href}
+              className={`
+                transition-colors
+                ${isLast 
+                  ? "text-black font-semibold cursor-default pointer-events-none" 
+                  : "hover:text-black hover:underline"
+                }
+              `}
+            >
+              {data.label}
+            </BreadcrumbLink>
+          </BreadcrumbItem>
 
-            : 
-              <div key={index} className="flex items-center">
-                <BreadcrumbItem >
-                    <BreadcrumbLink href={data.href}>{data.label}</BreadcrumbLink>
-                </BreadcrumbItem>
-                
-            </div>
+          {!isLast && (
+            <BreadcrumbSeparator className="text-gray-600"/> 
+          )}
 
-        )
-      })}
-       
-      </BreadcrumbList>
-    </Breadcrumb>
+        </React.Fragment>
+      );
+    })}
+
+  </BreadcrumbList>
+</Breadcrumb>
+
   );
 };
 

@@ -3,12 +3,14 @@
 import BreadCrumb from "@/components/Application/Admin/BreadCrumb";
 import Media from "@/components/Application/Admin/Media";
 import UploadMedia from "@/components/Application/Admin/UploadMedia";
+import ButtonLoading from "@/components/Application/ButtonLoading";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import useDeleteMutation from "@/hooks/useDeleteMutation";
 import { ADMIN_DASHBOARD, ADMIN_MEDIA_SHOW } from "@/routes/AdminPanelRoutes";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -17,13 +19,13 @@ import { MdDeleteSweep } from "react-icons/md";
 import { MdArrowCircleLeft } from "react-icons/md";
 import { MdRestore } from "react-icons/md";
 
-
 const breadcrumbData = [
-  { href: ADMIN_DASHBOARD, label: "Home" },
+  { href: ADMIN_DASHBOARD, label: "Dashboard" },
   { href: "", label: "Media" },
 ];
 
 const MediaPage = () => {
+  const queryClient = useQueryClient();
   const [deleteType, setDeleteType] = useState("SD");
   const [selectedMedia, setSelectedMedia] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
@@ -63,26 +65,35 @@ const MediaPage = () => {
       return lastPage.hasMore ? nextPage : undefined;
     },
   });
-
-  const handleDelete = () => {
+  const deleteMutation = useDeleteMutation("media-data", "/api/media/delete");
+  const handleDelete = (ids, deleteType) => {
     let c = true;
-    if(deleteType === 'PD'){
+    if (deleteType === "PD") {
       c = confirm("Are you sure you want to delete the data Permanently.");
     }
+
+    if (c) {
+      deleteMutation.mutate({ ids, deleteType });
+    }
+
+    setSelectAll(false);
+    setSelectedMedia([]);
   };
 
   const handleSelectAll = () => {
     setSelectAll(!selectAll);
   };
 
-  useEffect(()=>{
-    if(selectAll){
-      const ids = data.pages.flatMap(page => page.mediaData.map(media => media._id));
+  useEffect(() => {
+    if (selectAll) {
+      const ids = data.pages.flatMap((page) =>
+        page.mediaData.map((media) => media._id),
+      );
       setSelectedMedia(ids);
-    }else{
+    } else {
       setSelectedMedia([]);
     }
-  },[selectAll])
+  }, [selectAll]);
   return (
     <div>
       <BreadCrumb breadcrumbData={breadcrumbData} />
@@ -93,7 +104,7 @@ const MediaPage = () => {
               {deleteType === "SD" ? "Media" : "Trash Media"}
             </h4>
             <div className="flex items-center gap-5">
-              {deleteType === "SD" && <UploadMedia />}
+              {deleteType === "SD" && <UploadMedia isMultiple={true} queryClient={queryClient}/>}
               <div className="flex gap-3 ">
                 {deleteType === "SD" ? (
                   <Link href={`${ADMIN_MEDIA_SHOW}?trashof=media`}>
@@ -119,7 +130,7 @@ const MediaPage = () => {
             </div>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className='pb-5'>
           {selectedMedia.length > 0 && (
             <div className="py-2 px-3 bg-black/50 mb-2 flex justify-between items-center">
               <Label>
@@ -133,7 +144,8 @@ const MediaPage = () => {
               <div className="flex gap-2">
                 {deleteType === "SD" ? (
                   <>
-                    <Button className="bg-red-500 hover:bg-red-600 cursor-pointer"
+                    <Button
+                      className="bg-red-500 hover:bg-red-600 cursor-pointer"
                       variant="destructive"
                       onClick={() => handleDelete(selectedMedia, deleteType)}
                     >
@@ -143,22 +155,21 @@ const MediaPage = () => {
                   </>
                 ) : (
                   <>
-                  
-                   <Button className="bg-green-500 hover:bg-green-600 cursor-pointer"
-                      onClick={() => handleDelete(selectedMedia, 'RSD')}
+                    <Button
+                      className="bg-green-500 hover:bg-green-600 cursor-pointer"
+                      onClick={() => handleDelete(selectedMedia, "RSD")}
                     >
-                     <MdRestore/>
+                      <MdRestore />
                       Restore Media
                     </Button>
 
-                    <Button className="bg-red-500 hover:bg-red-600 cursor-pointer"
+                    <Button
+                      className="bg-red-500 hover:bg-red-600 cursor-pointer"
                       onClick={() => handleDelete(selectedMedia, deleteType)}
                     >
-                     <MdDeleteSweep />
+                      <MdDeleteSweep />
                       Delete Permanently
                     </Button>
-                  
-                  
                   </>
                 )}
               </div>
@@ -169,23 +180,29 @@ const MediaPage = () => {
           ) : status === "error" ? (
             <div className="text-red-500 text-sm">{error.message}</div>
           ) : (
-            <div className="grid lg:grid-cols-5 sm:grid-cols-3 grid-cols-2 gap-2 mb-5 ">
-              {data?.pages?.map((page, index) => (
-                <React.Fragment key={index}>
-                  {page?.mediaData?.map((media) => (
-                    <Media
-                      key={media._id}
-                      media={media}
-                      deleteType={deleteType}
-                      handleDelete={handleDelete}
-                      selectedMedia={selectedMedia}
-                      setSelectedMedia={setSelectedMedia}
-                    />
-                  ))}
-                </React.Fragment>
-              ))}
-            </div>
+            <>
+            {data.pages.flatMap((page) => page.mediaData.map((media) => media._id)).length === 0 && <div className="text-center text-2xl font-bold text-red-500">Data Not Found !</div>}
+              <div className="grid lg:grid-cols-5 sm:grid-cols-3 grid-cols-2 gap-2 mb-5 ">
+                {data?.pages?.map((page, index) => (
+                  <React.Fragment key={index}>
+                    {page?.mediaData?.map((media) => (
+                      <Media
+                        key={media._id}
+                        media={media}
+                        deleteType={deleteType}
+                        handleDelete={handleDelete}
+                        selectedMedia={selectedMedia}
+                        setSelectedMedia={setSelectedMedia}
+                      />
+                    ))}
+                  </React.Fragment>
+                ))}
+              </div>
+            </>
           )}
+          {hasNextPage && 
+            <ButtonLoading type='button' className="cursor-pointer text-white font-bold bg-gray-500 hover:bg-gray-600" loading={isFetching} text="Load More" onClick={()=>fetchNextPage()}/>
+          }
         </CardContent>
       </Card>
     </div>

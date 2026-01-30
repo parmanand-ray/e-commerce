@@ -1,4 +1,5 @@
 "use client";
+
 import BreadCrumb from "@/components/Application/Admin/BreadCrumb";
 import ButtonLoading from "@/components/Application/ButtonLoading";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -11,96 +12,79 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import useFetch from "@/hooks/useFetch";
 import { zSchema } from "@/lib/zodSchema";
-import { ADMIN_DASHBOARD, ADMIN_MEDIA_SHOW } from "@/routes/AdminPanelRoutes";
+import {
+  ADMIN_CATEGORY_ADD,
+  ADMIN_CATEGORY_SHOW,
+  ADMIN_DASHBOARD,
+} from "@/routes/AdminPanelRoutes";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Image from "next/image";
-
-import React, { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import imgPlaceholder from "@/public/assets/images/img-placeholder.webp";
+import { makeSlug } from "@/lib/utils";
 import axios from "axios";
 import { showToast } from "@/lib/showToast";
-
-const breadCrumbData = [
-  {
-    href: ADMIN_DASHBOARD,
-    label: "Dashboard",
-  },
-  {
-    href: ADMIN_MEDIA_SHOW,
-    label: "Media",
-  },
-  {
-    href: "",
-    label: "Edit Media",
-  },
+const breadcrumbData = [
+  { href: ADMIN_DASHBOARD, label: "Dashboard" },
+  { href: ADMIN_CATEGORY_SHOW, label: "All Category" },
+  { href: ADMIN_CATEGORY_ADD, label: "Add Category" },
 ];
-const formSchema = zSchema.pick({ _id: true, alt: true, title: true });
-const EditMedia = ({ params }) => {
-  const { id } = React.use(params);
 
-  const { data: mediaData, error } = useFetch(
-    id ? `/api/media/get/${id}` : null,
-  );
+const AddCategory = () => {
   const [loading, setLoading] = useState(false);
+  const formSchema = zSchema.pick({ name: true, slug: true });
 
   const form = useForm({
     resolver: zodResolver(formSchema),
-    defaultValues: { _id: "", alt: "", title: "" },
+    defaultValues: { name: "", slug: "" },
   });
 
-  useEffect(() => {
-    if (mediaData?.data) {
-      form.reset({
-        _id: mediaData.data._id,
-        alt: mediaData.data.alt || "",
-        title: mediaData.data.title || "",
-      });
-    }
-  }, [mediaData, form]);
-
   const onSubmit = async (values) => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const { data: response } = await axios.put("/api/media/update", values);
+      const { data: response } = await axios.post(
+        "/api/category/create",
+        values,
+      );
       if (!response.success) throw new Error(response.message);
       showToast("success", response.message);
-    } catch (err) {
-      showToast("error", err?.response?.data?.message || err.message);
+      form.reset();
+    } catch (error) {
+      showToast("error", error?.response?.data?.message || error.message);
     } finally {
       setLoading(false);
     }
   };
+  useEffect(() => {
+    const name = form.getValues("name");
+    if (name) {
+      form.setValue("slug", makeSlug(name));
+    }
+  }, [form.watch("name")]);
   return (
     <div>
-      <BreadCrumb breadcrumbData={breadCrumbData} />
+      <BreadCrumb breadcrumbData={breadcrumbData} />
       <Card className="py-0 rounded shadow-sm">
         <CardHeader className="pt-3  px-3 border-b [.border-b]:pb-2">
-          <h4 className="text-xl font-semibold">Edit Media</h4>
+          <h4 className="text-xl font-semibold">Add Category</h4>
         </CardHeader>
 
         <CardContent className="pb-5">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
               <div className="mb-5">
-                <Image
-                  src={mediaData?.data?.secure_url || imgPlaceholder}
-                  width={300}
-                  height={300}
-                  alt="Media Image"
-                />
-              </div>
-              <div className="mb-5">
                 <FormField
                   control={form.control}
-                  name="alt"
+                  name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Alt</FormLabel>
+                      <FormLabel>Name</FormLabel>
                       <FormControl>
-                        <Input type="text" placeholder="Enter Alt" {...field} />
+                        <Input
+                          type="text"
+                          placeholder="Enter Name"
+                          {...field}
+                        />
                       </FormControl>
 
                       <FormMessage />
@@ -112,14 +96,14 @@ const EditMedia = ({ params }) => {
               <div className="mb-5">
                 <FormField
                   control={form.control}
-                  name="title"
+                  name="slug"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Title</FormLabel>
+                      <FormLabel>Slug</FormLabel>
                       <FormControl>
                         <Input
                           type="text"
-                          placeholder="Enter Title"
+                          placeholder="Enter Slug"
                           {...field}
                         />
                       </FormControl>
@@ -133,9 +117,9 @@ const EditMedia = ({ params }) => {
               <div className="mb-3">
                 <ButtonLoading
                   type="submit"
-                  text="Update Media"
+                  text="Add Category"
                   loading={loading}
-                  className={"cursor-pointer bg-violet-500"}
+                  className={"cursor-pointer bg-black/75 hover:bg-black/80 text-white"}
                 />
               </div>
             </form>
@@ -146,4 +130,4 @@ const EditMedia = ({ params }) => {
   );
 };
 
-export default EditMedia;
+export default AddCategory;

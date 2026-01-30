@@ -5,7 +5,7 @@ import axios from "axios";
 import { CldUploadWidget } from "next-cloudinary";
 import { FaFolderPlus } from "react-icons/fa6";
 
-const UploadMedia = ({ isMultiple }) => {
+const UploadMedia = ({ isMultiple, queryClient }) => {
   const handleOnError = () => {};
   const handleOnQueuesEnd = async (results) => {
     const files = results.info.files;
@@ -24,6 +24,7 @@ const UploadMedia = ({ isMultiple }) => {
          if(!mediaUploadResponse.success){
           throw new Error(mediaUploadResponse.message);
          }
+         queryClient.invalidateQueries('media-data');
          showToast('success',mediaUploadResponse.message);
       } catch (error) {
         showToast('error', error.message);

@@ -6,14 +6,7 @@ import Logo from "@/public/assets/images/logo-black.png";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { zSchema } from "@/lib/zodSchema";
 import { useForm } from "react-hook-form";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import ButtonLoading from "@/components/Application/ButtonLoading";
 import Link from "next/link";
@@ -27,7 +20,7 @@ function ResetPassword() {
   const [emailVerificatonLoading, setEmailVerificatonLoading] = useState(false);
   const [otpVerificationLoading, setOtpVerificationLoading] = useState(false);
   const [isOtpVerified, setIsOtpVerified] = useState(false);
-   const [otpEmail, setOtpEmail] = useState();
+  const [otpEmail, setOtpEmail] = useState();
   const formSchema = zSchema.pick({
     email: true,
   });
