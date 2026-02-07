@@ -105,6 +105,8 @@ const AddCategory = () => {
                           type="text"
                           placeholder="Enter Slug"
                           {...field}
+                           readOnly
+                          className="bg-gray-100 text-gray-500 border-gray-200 cursor-not-allowed"
                         />
                       </FormControl>
 

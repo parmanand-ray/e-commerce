@@ -1,8 +1,9 @@
-import { response, catchError, isAuthenticated } from "@/lib/helperFunction";
+import { response, catchError } from "@/lib/helperFunction";
 import CategoryModel from "@/models/Category.model";
-import { makeSlug } from "@/lib/utils";
+
 import { connectDB } from "@/lib/dbconn";
 import { zSchema } from "@/lib/zodSchema";
+import { isAuthenticated } from "@/lib/authentication";
 export async function POST(request) {
   try {
 

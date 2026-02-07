@@ -15,3 +15,5 @@ export const ADMIN_PRODUCT_EDIT = (id) => id ? `/admin/product/edit/${id}` : '';
 // Order Routes
 export const ADMIN_ORDER_SHOW = '/admin/order';
 export const ADMIN_ORDER_DETAILS = (id) => id ? `/admin/order/details/${id}` : '';
+//thrash routes
+export const ADMIN_TRASH = '/admin/trash';

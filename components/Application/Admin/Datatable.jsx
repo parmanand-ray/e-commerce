@@ -2,6 +2,7 @@ import { IconButton, Tooltip } from "@mui/material";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import {
+  MaterialReactTable,
   MRT_ShowHideColumnsButton,
   MRT_ToggleDensePaddingButton,
   MRT_ToggleFullScreenButton,
@@ -9,16 +10,17 @@ import {
   useMaterialReactTable,
 } from "material-react-table";
 import Link from "next/link";
-import React, { use, useState } from "react";
+import  {  useState } from "react";
 import RecyclingIcon from "@mui/icons-material/Recycling";
 import DeleteIcon from "@mui/icons-material/Delete";
 import RestoreFromTrashIcon from "@mui/icons-material/RestoreFromTrash";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import useDeleteMutation from "@/hooks/useDeleteMutation";
 import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
-import ButtonLoading from "../ButtonLoading";
+
 import { showToast } from "@/lib/showToast";
-import { file, object } from "zod";
+import ButtonLoading from "../ButtonLoading";
+import { download, generateCsv, mkConfig } from "export-to-csv";
 const Datatable = ({
   queryKey,
   fetchUrl,
@@ -59,11 +61,11 @@ const Datatable = ({
     }
   };
     //handle export action
-    const handleExport = async (rows) => {
+    const handleExport = async (selectedRows) => {
         setExportLoading(true);
         try {
           const csvConfig = mkConfig({
-            feildSaprator: ',',
+            fieldSeparator: ',',
             quoteStrings: '"',
             decimalSeparator: '.',
             useKeysAsHeaders: true,
@@ -72,7 +74,7 @@ const Datatable = ({
           let csv
           if(Object.keys(rowSelection).length > 0) {
             //export selected rows
-            const rowData = selectedRows.map(row => row.o   riginal);
+            const rowData = selectedRows.map(row => row.original);
             csv = generateCsv(csvConfig)(rowData) ;
           } else {
             //export all rows   
@@ -97,7 +99,7 @@ const Datatable = ({
 
   //data fetching logic would go here
   const {
-    data: { data = [], meta = 0 } = {},
+    data: { data = [], meta } = {},
     isLoading,
     isRefetching,
     isError,
@@ -113,14 +115,14 @@ const Datatable = ({
       url.searchParams.set("filters", JSON.stringify(columnFilters ?? []));
       url.searchParams.set("globalFilter", globalFilter ?? "");
       url.searchParams.set("sorting", JSON.stringify(sorting ?? []));
-
+      url.searchParams.set("deleteType", deleteType);
       const { data: response } = await axios.get(url.href);
       return response;
     },
 
-    placeholderData: keepPreviousData,
+    placeholderData: keepPreviousData, 
   });
-
+ console.log(meta);
   //initialize Table
   const table = useMaterialReactTable({
     columns: columnsConfig,
@@ -147,8 +149,8 @@ const Datatable = ({
     onGlobalFilterChange: setGlobalFilter,
     onPaginationChange: setPagination,
     onSortingChange: setSorting,
-    rowCount: data?.meta?.totalRowCount ?? 0,
-    onRowSelectionChange: setSelectedRows,
+    rowCount: meta?.totalRowCount ?? 0,
+    onRowSelectionChange: setRowSelection,
     state: {
       columnFilters,
       globalFilter,
@@ -159,9 +161,11 @@ const Datatable = ({
       isLoading,
       rowSelection,
     },
-    getRowId: (originalRow) => originalRow.id,
+    getRowId: (originalRow) => originalRow._id,
+
 
     renderToolbarInternalActions: ({ table }) => (
+     
       <>
         {/* built in buttons. */}
         <MRT_ToggleGlobalFilterButton table={table} />
@@ -225,18 +229,20 @@ const Datatable = ({
     ),
     enableRowActions: true,
     positionActionsColumn: "last",
-    renderRowActionsMenuItems: ({ table }) => (
+    renderRowActionMenuItems: ({ row }) => createAction(row, deleteType, handleDelete),
+    renderTopToolbarCustomActions: ({ table }) => (
       <Tooltip>
         <ButtonLoading
           type="button"
           text={
             <>
-              {" "}
-              <CloudDownloadIcon /> Export
+             
+              <CloudDownloadIcon className="mr-2 " /> Export
             </>
           }
           loading={exportLoading}
           onClick={() => handleExport(table.getSelectedRowModel().rows)}
+          className="m-0 cursor-pointer bg-gray-500 hover:bg-gray-600 text-white transition-colors duration-200"
         />
       </Tooltip>
     ),
