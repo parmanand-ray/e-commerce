@@ -150,3 +150,28 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .product-form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    width: 100%;
+    align-items: start;
+  }
+
+  .product-form-cell {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .product-form-full {
+    grid-column: 1 / -1;
+  }
+
+  @media (min-width: 768px) {
+    .product-form-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+}

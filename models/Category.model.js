@@ -4,13 +4,13 @@
       {
         name: {
           type: String,
-          require: true,
+          required: true,
           trim:true,
           unique:true
         },
         slug: {
           type: String,
-          require: true,
+          required: true,
           trim:true,
           unique:true
         },

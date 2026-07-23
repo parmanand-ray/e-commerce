@@ -2,8 +2,8 @@ import { isAuthenticated } from "@/lib/authentication";
 import { connectDB } from "@/lib/dbconn";
 import { catchError, response } from "@/lib/helperFunction";
 import CategoryModel from "@/models/Category.model";
-import { matchQuery } from "@tanstack/react-query";
 import { NextResponse } from "next/server";
+import { success } from "zod";
 
 export async function GET(request) {
   try {
@@ -68,13 +68,13 @@ export async function GET(request) {
     //execute query
     const getCategory = await CategoryModel.aggregate(aggregationPipeline);
     const totalCount = await CategoryModel.countDocuments(matchQuery);
-   return NextResponse.json({
-  data: getCategory,
-  meta: {
-    totalRowCount: totalCount,
-  },
-});
-
+    return NextResponse.json({
+      success: true,
+      data: getCategory,
+      meta: {
+        totalRowCount: totalCount,
+      },
+    });
   } catch (error) {
     return catchError(error);
   }
